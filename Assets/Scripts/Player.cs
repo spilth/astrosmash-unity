@@ -8,22 +8,31 @@ public class Player : MonoBehaviour
     public GameObject missilePrefab;
 
     private Rigidbody2D _rig;
+
     private bool _movingLeft;
     private bool _movingRight;
     private bool _firing;
     private float _elapsedTime;
     private int _score;
-    private int _lives = 3;
-    private Text _scoreComponent;
-    private Text _livesComponent;
+    private int _lifeCount = 3;
+    private int _missileCount = 10;
+
+    private Text _scoreText;
+    private Text _livesText;
+    private Text _missilesText;
+    private AudioSource _audioSource;
 
     private void Start()
     {
         _rig = GetComponent<Rigidbody2D>();
-        _scoreComponent = GameObject.Find("Score").GetComponent<Text>();
-        _scoreComponent.text = _score.ToString();
-        _livesComponent = GameObject.Find("Lives").GetComponent<Text>();
-        _livesComponent.text = _lives.ToString();
+        _audioSource = GetComponent<AudioSource>();
+
+        _scoreText = GameObject.Find("Score").GetComponent<Text>();
+        _scoreText.text = _score.ToString();
+        _livesText = GameObject.Find("Lives").GetComponent<Text>();
+        _livesText.text = _lifeCount.ToString();
+        _missilesText = GameObject.Find("Missiles").GetComponent<Text>();
+        _missilesText.text = _missileCount.ToString();
     }
 
     private void Update()
@@ -60,7 +69,7 @@ public class Player : MonoBehaviour
     public void AddScore(int points)
     {
         _score += points;
-        _scoreComponent.text = _score.ToString();
+        _scoreText.text = _score.ToString();
     }
 
     private void FixedUpdate()
@@ -80,16 +89,33 @@ public class Player : MonoBehaviour
             if (_elapsedTime > fireRate)
             {
                 _elapsedTime = 0;
-                var transformPosition = transform.position;
-                Instantiate(missilePrefab, new Vector3(transformPosition.x, transformPosition.y + 1.1f, 0),
-                    Quaternion.identity);
+
+                if (_missileCount > 0)
+                {
+                    _missileCount--;
+                    _missilesText.text = _missileCount.ToString();
+
+                    var transformPosition = transform.position;
+                    Instantiate(missilePrefab, new Vector3(transformPosition.x, transformPosition.y + 1.1f, 0),
+                        Quaternion.identity);
+                }
+                else
+                {
+                    _audioSource.Play();
+                }
             }
         }
     }
 
     public void RemoveLife()
     {
-        _lives--;
-        _livesComponent.text = _lives.ToString();
+        _lifeCount--;
+        _livesText.text = _lifeCount.ToString();
+    }
+
+    public void AddMissiles(int count)
+    {
+        _missileCount += count;
+        _missilesText.text = _missileCount.ToString();
     }
 }
